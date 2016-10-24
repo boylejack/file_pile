@@ -56,7 +56,8 @@ defmodule FilePile do
     intervals_random = random_intervals(number_of_files, (List.last(intervals_list) + 1))
     indexes = intervals_to_indexes(intervals_random, intervals_list)
     sizes = indexes_to_sizes(indexes, size_list)
-    IO.inspect sizes
+
+    IO.puts "Creating #{List.foldl(sizes, 0, fn(x, acc) -> x + acc end)} bytes of data"
     Enum.map(sizes, fn(x) -> generate_output(x, words_list, output_dir) end)
   end
 
