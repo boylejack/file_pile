@@ -5,7 +5,7 @@ FilePile creates N random files, based on a given size profile and containing so
 FilePile uses escript to generate an executable. You must have elixir and erlang installed on your machine. 
 To generate this executable:
 
-    ```shell
+    ```
     git clone https://github.com/mycroftHo/file_pile.git
     cd file_pile
     mix deps.get
@@ -13,6 +13,6 @@ To generate this executable:
     ```
 ## Usage
 To generate you files run the following command in the same directory where you generated the executable:
-    ```shell
-    ./filepile --weights "/path/to/weights.csv" --n NumberOfFiles --outdir "/path/to/output/directory" --words "/path/to/input/words"
+    ```
+    ./filepile --weights "weights.csv" --n NumberOfFiles --outdir "outputdirectory" --words "inputwords"
     ```
