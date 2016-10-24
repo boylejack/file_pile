@@ -1,11 +1,9 @@
 defmodule FilePile do
   def main(args) do
 
-    IO.inspect args
     output_dir = 
       args
       |> parse_args
-      |> IO.inspect
       |> List.keytake(:outdir, 0)
       |> extract_from_keytake
 
