@@ -1,6 +1,32 @@
 defmodule FilePile do
   def main(args) do
 
+    IO.inspect args
+    output_dir = 
+      args
+      |> parse_args
+      |> IO.inspect
+      |> List.keytake(:outdir, 0)
+      |> extract_from_keytake
+
+    words = 
+      args
+      |> parse_args
+      |> List.keytake(:words, 0)
+      |> extract_from_keytake
+      |> File.stream!
+      |> CSV.decode
+
+    words_list_size = 
+      words
+      |> Enum.count
+
+    words_list = 
+      words
+      |> Enum.take(words_list_size)
+      |> to_string_list
+      |> IO.inspect
+
     number_of_files = 
       args
       |> parse_args
@@ -27,14 +53,27 @@ defmodule FilePile do
 
     {size_list, weight_list} = Enum.unzip(weights_size_list)
     intervals_list = weights_to_intervals(weight_list)
-
     
     intervals_random = random_intervals(number_of_files, (List.last(intervals_list) + 1))
     indexes = intervals_to_indexes(intervals_random, intervals_list)
     sizes = indexes_to_sizes(indexes, size_list)
-    word_list = ["hello", "goodbye", "greetings"]
-    Enum.map(sizes, fn(x) -> generate_string(x, word_list) end)
-    |> IO.inspect
+    Enum.map(sizes, fn(x) -> generate_string(x, words_list) end)
+    |> Enum.map(fn(x) -> write_string_out_to_file(x, output_dir) end)
+  end
+
+  def to_string_list([]) do
+    []
+  end
+
+  def to_string_list([h|t]) do
+    [hd(h)] ++ to_string_list(t)
+  end
+
+  def write_string_out_to_file(string, dir) do
+    name = dir <> "/" <> UUID.uuid1() <> ".txt"
+    {:ok, file} = File.open name, [:write]
+    IO.binwrite file, string
+    File.close file
   end
 
   def indexes_to_sizes([], _) do
