@@ -32,8 +32,9 @@ defmodule FilePile do
     intervals_random = random_intervals(number_of_files, (List.last(intervals_list) + 1))
     indexes = intervals_to_indexes(intervals_random, intervals_list)
     sizes = indexes_to_sizes(indexes, size_list)
-    IO.inspect sizes
-
+    word_list = ["hello", "goodbye", "greetings"]
+    Enum.map(sizes, fn(x) -> generate_string(x, word_list) end)
+    |> IO.inspect
   end
 
   def indexes_to_sizes([], _) do
@@ -53,6 +54,15 @@ defmodule FilePile do
     # ++ intervals_to_indexes(tl(intervals_random), list_of_intervals)
   end
 
+  def generate_string(size, word_list) do
+    if size <= 0 do
+      ""
+    else
+      next_word = Enum.fetch!(word_list, :rand.uniform(Enum.count(word_list)) - 1) 
+      next_word <> " " <> generate_string(size - String.length(next_word), word_list)
+    end
+
+  end
 
 
   def random_intervals(0, biggest_interval) do
