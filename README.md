@@ -13,6 +13,9 @@ To generate this executable:
     ```
 ## Usage
 To generate you files run the following command in the same directory where you generated the executable:
+
     ```
-    ./filepile --weights "weights.csv" --n NumberOfFiles --outdir "outputdirectory" --words "inputwords"
+    ./filepile --weights "weights.csv" --n 10 --outdir "outputdirectory" --words "inputwords.csv"
     ```
+This will generate 10 files in the outputdirectory using weights.csv and the inputwords list.
+Please note that you should use full paths to files and directories when calling this script.
