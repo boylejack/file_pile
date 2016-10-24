@@ -25,7 +25,6 @@ defmodule FilePile do
       words
       |> Enum.take(words_list_size)
       |> to_string_list
-      |> IO.inspect
 
     number_of_files = 
       args
@@ -57,8 +56,14 @@ defmodule FilePile do
     intervals_random = random_intervals(number_of_files, (List.last(intervals_list) + 1))
     indexes = intervals_to_indexes(intervals_random, intervals_list)
     sizes = indexes_to_sizes(indexes, size_list)
-    Enum.map(sizes, fn(x) -> generate_string(x, words_list) end)
-    |> Enum.map(fn(x) -> write_string_out_to_file(x, output_dir) end)
+    IO.inspect sizes
+    Enum.map(sizes, fn(x) -> generate_output(x, words_list, output_dir) end)
+  end
+
+  def generate_output(size, words_list, dir) do
+    name = dir <> "/" <> UUID.uuid1() <> ".txt"
+    {:ok, file} = File.open name, [:write]
+    write_out_to_file(size, words_list, file)
   end
 
   def to_string_list([]) do
@@ -69,11 +74,15 @@ defmodule FilePile do
     [hd(h)] ++ to_string_list(t)
   end
 
-  def write_string_out_to_file(string, dir) do
-    name = dir <> "/" <> UUID.uuid1() <> ".txt"
-    {:ok, file} = File.open name, [:write]
-    IO.binwrite file, string
-    File.close file
+  def write_out_to_file(size, words_list, file) do
+    if size <= 0 do
+      File.close file
+    else
+      word_to_write = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
+      IO.binwrite file, word_to_write
+      IO.binwrite file, " " 
+      write_out_to_file(size - 1 - byte_size(word_to_write), words_list, file)
+    end
   end
 
   def indexes_to_sizes([], _) do
@@ -93,14 +102,13 @@ defmodule FilePile do
     # ++ intervals_to_indexes(tl(intervals_random), list_of_intervals)
   end
 
-  def generate_string(size, word_list) do
+  def generate_string(size, words_list) do
     if size <= 0 do
       ""
     else
-      next_word = Enum.fetch!(word_list, :rand.uniform(Enum.count(word_list)) - 1) 
-      next_word <> " " <> generate_string(size - String.length(next_word), word_list)
+      next_word = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
+      next_word <> " " <> generate_string(size - 7, words_list)
     end
-
   end
 
 
