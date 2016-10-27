@@ -49,37 +49,41 @@ defmodule FilePile do
   end
 
   def generate_pdf(size, words_list, dir) do
-    name = dir <> "/" <> UUID.uuid1() <> ".pdf"
-    write_out_to_file(false, name, size, words_list)
+    #tex will be converted by pdf later
+    name = dir <> "/" <> UUID.uuid1() <> ".tex"
+    preamble = "\\documentclass{article}\n\\begin{document}\n"
+    ending = "\n\\end{document}"
+    write_out_to_file(preamble, ending, false, name, size, words_list)
   end
  
   def generate_doc(size, words_list, dir) do
     #txt is a temporary name, we will convert this at the end 
     name = dir <> "/" <> UUID.uuid1() <> ".txt"
-    write_out_to_file(false, name, size, words_list)
+    write_out_to_file("", "", false, name, size, words_list)
   end
 
   def generate_txt(size, words_list, dir) do
     #text is a temporary name, this will be converted at the end
     name = dir <> "/" <> UUID.uuid1() <> ".text"
-    write_out_to_file(false, name, size, words_list)
+    write_out_to_file("", "", false, name, size, words_list)
   end
   
-  def write_out_to_file(file_created, file, size, words_list) do
+  def write_out_to_file(preamble, ending, file_created, file, size, words_list) do
     if file_created == false do
       {:ok, new_file} = File.open file, [:write]
-      IO.puts "making a new file"
-      write_out_to_file(true, new_file, size, words_list)
+      IO.binwrite new_file, preamble
+      write_out_to_file(preamble, ending, true, new_file, size, words_list)
     end
 
     if size <= 0 and file_created == true do
+      IO.binwrite file, ending
       File.close file
     end
     if size >= 0 and file_created == true do
       word_to_write = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
       IO.binwrite file, word_to_write
       IO.binwrite file, " " 
-      write_out_to_file(true, file, size - 1 - byte_size(word_to_write), words_list)
+      write_out_to_file(preamble, ending, true, file, size - 1 - byte_size(word_to_write), words_list)
     end
   end
   
