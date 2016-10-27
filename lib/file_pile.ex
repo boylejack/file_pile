@@ -1,17 +1,10 @@
 defmodule FilePile do
   def main(args) do
 
-    output_dir = 
-      args
-      |> parse_args
-      |> List.keytake(:outdir, 0)
-      |> extract_from_keytake
+    output_dir = get_args(args, :outdir)
 
     words = 
-      args
-      |> parse_args
-      |> List.keytake(:words, 0)
-      |> extract_from_keytake
+      get_args(args, :words)
       |> File.stream!
       |> CSV.decode
 
@@ -25,44 +18,94 @@ defmodule FilePile do
       |> to_string_list
 
     number_of_files = 
-      args
-      |> parse_args
-      |> List.keytake(:n, 0)
-      |> extract_from_keytake
+      get_args(args, :n)
       |> String.to_integer
 
-    weights_size_file = 
-      args
-      |> parse_args
-      |> List.keytake(:weights, 0)
-      |> extract_from_keytake
+    sizes = parse_weights_file(args, :weights, number_of_files, "size")
+
+    types = parse_weights_file(args, :types, number_of_files, "type")
+
+    all_of_the_files = List.zip([types,sizes])
+    IO.inspect all_of_the_files
+
+    IO.puts "Creating #{List.foldl(sizes, 0, fn(x, acc) -> String.to_integer(x) + acc end)} bytes of data"
+    Enum.map(all_of_the_files, fn(x) -> generate_output(x, words_list, output_dir) end)
+  end
+  
+
+  def get_args(args, argname) do
+    args
+    |> parse_args
+    |> List.keytake(argname, 0)
+    |> extract_from_keytake
+  end
+
+  def generate_output({type, size}, words_list, dir) do
+    case type do
+      "pdf" -> generate_pdf(String.to_integer(size), words_list, dir)
+      "doc" -> generate_doc(String.to_integer(size), words_list, dir)
+      _ -> generate_txt(String.to_integer(size), words_list, dir)
+    end
+  end
+
+  def generate_pdf(size, words_list, dir) do
+    name = dir <> "/" <> UUID.uuid1() <> ".pdf"
+    write_out_to_file(false, name, size, words_list)
+  end
+ 
+  def generate_doc(size, words_list, dir) do
+    #txt is a temporary name, we will convert this at the end 
+    name = dir <> "/" <> UUID.uuid1() <> ".txt"
+    write_out_to_file(false, name, size, words_list)
+  end
+
+  def generate_txt(size, words_list, dir) do
+    #text is a temporary name, this will be converted at the end
+    name = dir <> "/" <> UUID.uuid1() <> ".text"
+    write_out_to_file(false, name, size, words_list)
+  end
+  
+  def write_out_to_file(file_created, file, size, words_list) do
+    if file_created == false do
+      {:ok, new_file} = File.open file, [:write]
+      IO.puts "making a new file"
+      write_out_to_file(true, new_file, size, words_list)
+    end
+
+    if size <= 0 and file_created == true do
+      File.close file
+    end
+    if size >= 0 and file_created == true do
+      word_to_write = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
+      IO.binwrite file, word_to_write
+      IO.binwrite file, " " 
+      write_out_to_file(true, file, size - 1 - byte_size(word_to_write), words_list)
+    end
+  end
+  
+  #returns a list of terms from a term-weight file
+  def parse_weights_file(args, arg_name, number_of_files, first_parsing_term) do
+    file = 
+      get_args(args, arg_name)
       |> File.stream!
       |> CSV.decode(headers: true)
 
-    weights_size_count = 
-      weights_size_file
+    row_count = 
+      file
       |> Enum.count
 
-    weights_size_list =
-      weights_size_file
-      |> Enum.take(weights_size_count)
-      |> Enum.map(fn maps -> to_tuple(maps) end)
+    file_as_list =
+      file
+      |> Enum.take(row_count)
+      |> Enum.map(fn maps -> to_tuple(maps, first_parsing_term, "weight") end)
 
-    {size_list, weight_list} = Enum.unzip(weights_size_list)
-    intervals_list = weights_to_intervals(weight_list)
+    {first_term_list, weights_list} = Enum.unzip(file_as_list)
+    intervals_list = weights_to_intervals(weights_list)
     
-    intervals_random = random_intervals(number_of_files, (List.last(intervals_list) + 1))
-    indexes = intervals_to_indexes(intervals_random, intervals_list)
-    sizes = indexes_to_sizes(indexes, size_list)
-
-    IO.puts "Creating #{List.foldl(sizes, 0, fn(x, acc) -> x + acc end)} bytes of data"
-    Enum.map(sizes, fn(x) -> generate_output(x, words_list, output_dir) end)
-  end
-
-  def generate_output(size, words_list, dir) do
-    name = dir <> "/" <> UUID.uuid1() <> ".txt"
-    {:ok, file} = File.open name, [:write]
-    write_out_to_file(size, words_list, file)
+    terms = 
+      random_intervals(number_of_files, (List.last(intervals_list) + 1))
+      |> intervals_to_indexes(intervals_list)
+      |> indexes_to_sizes(first_term_list)
   end
 
   def to_string_list([]) do
@@ -73,15 +116,12 @@ defmodule FilePile do
     [hd(h)] ++ to_string_list(t)
   end
 
-  def write_out_to_file(size, words_list, file) do
-    if size <= 0 do
-      File.close file
-    else
-      word_to_write = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
-      IO.binwrite file, word_to_write
-      IO.binwrite file, " " 
-      write_out_to_file(size - 1 - byte_size(word_to_write), words_list, file)
-    end
+  def indexes_to_types([], _) do
+    []
+  end
+
+  def indexes_to_types(indexes, type_list) do
+    [Enum.fetch!(type_list, hd(indexes))] ++ indexes_to_types(tl(indexes), type_list) 
   end
 
   def indexes_to_sizes([], _) do
@@ -98,18 +138,7 @@ defmodule FilePile do
 
   def intervals_to_indexes([h|t], list_of_intervals) do
     [Enum.find_index(list_of_intervals, fn(x) -> h <= x end)] ++ intervals_to_indexes(t, list_of_intervals)
-    # ++ intervals_to_indexes(tl(intervals_random), list_of_intervals)
   end
-
-  def generate_string(size, words_list) do
-    if size <= 0 do
-      ""
-    else
-      next_word = Enum.fetch!(words_list, :rand.uniform(Enum.count(words_list)) - 1) 
-      next_word <> " " <> generate_string(size - 7, words_list)
-    end
-  end
-
 
   def random_intervals(0, biggest_interval) do
     []
@@ -119,14 +148,14 @@ defmodule FilePile do
     [:rand.uniform(biggest_interval) - 1] ++ random_intervals((n-1), biggest_interval)
   end
 
-  def to_tuple(map) do
-    size = 
-      Map.get(map, "size")
-      |> String.to_integer
+#TODO refactor entirely
+  def to_tuple(map, first_term, second_term) do
+    term = 
+      Map.get(map, first_term)
     weight = 
-      Map.get(map, "weight")
+      Map.get(map, second_term)
       |> String.to_integer
-    {size, weight}
+    {term, weight}
   end
 
   def parse_args(args) do
