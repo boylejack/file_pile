@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in *.tex; do pdflatex $i; done
+for i in *.tex; do lualatex $i; done
 rm *.aux
 rm *.log
 rm *.tex
