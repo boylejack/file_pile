@@ -1,8 +1,9 @@
 defmodule FilePile do
   def main(args) do
 
-    output_dir = get_args(args, :outdir)
-
+    output_dir = 
+      get_args(args, :outdir)
+ 
     words = 
       get_args(args, :words)
       |> File.stream!
@@ -30,6 +31,20 @@ defmodule FilePile do
 
     IO.puts "Creating #{List.foldl(sizes, 0, fn(x, acc) -> String.to_integer(x) + acc end)} bytes of data"
     Enum.map(all_of_the_files, fn(x) -> generate_output(x, words_list, output_dir) end)
+
+    IO.puts "Creating pdf documents"
+    :os.cmd(String.to_char_list("(cd #{output_dir})"))
+    IO.puts :os.cmd(String.to_char_list("(cd #{output_dir}; for i in #{output_dir}/*.tex; do lualatex $i; done)"))
+    IO.puts "Cleaning up"
+    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.tex)"))
+    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.aux)"))
+    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.log)"))
+    IO.puts "Creating Word Documents"
+    :os.cmd(String.to_char_list("(cd #{output_dir}; for j in *.txt; do soffice --headless --convert-to docx:\"MS Word 2007 XML\" $j; done)"))
+    :os.cmd(String.to_char_list("(cd #{output_dir}; rm *.txt)"))
+    :os.cmd(String.to_char_list("(cd #{output_dir}; for f in *.text; do mv -- \"$f\" \"${f%.text}.txt\"; done)"))
+    IO.puts "Done!"
+
   end
   
 
@@ -96,7 +111,7 @@ defmodule FilePile do
   #returns a list of terms from a term-weight file
   def parse_weights_file(args, arg_name, number_of_files, first_parsing_term) do
     file = 
-      get_args(args, arg_name)
+      (get_args(args, arg_name))
       |> File.stream!
       |> CSV.decode(headers: true)
 
