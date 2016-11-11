@@ -1,21 +1,10 @@
 defmodule FilePile do
   def main(args) do
-
     output_dir = 
       get_args(args, :outdir)
- 
-    words = 
-      get_args(args, :words)
-      |> File.stream!
-      |> CSV.decode
-
-    words_list_size = 
-      words
-      |> Enum.count
 
     words_list = 
-      words
-      |> Enum.take(words_list_size)
+      file_to_lines_list(args, :words, false)
       |> to_string_list
 
     number_of_files = 
@@ -26,27 +15,33 @@ defmodule FilePile do
 
     types = parse_weights_file(args, :types, number_of_files, "type")
 
-    all_of_the_files = List.zip([types,sizes])
-    IO.inspect all_of_the_files
+    file_specs = List.zip([types,sizes])
+    IO.inspect file_specs
 
     IO.puts "Creating #{List.foldl(sizes, 0, fn(x, acc) -> String.to_integer(x) + acc end)} bytes of data"
-    Enum.map(all_of_the_files, fn(x) -> generate_output(x, words_list, output_dir) end)
+    Enum.map(file_specs, fn(file_specification) -> generate_output(file_specification, words_list, output_dir) end)
 
+    convert_files(output_dir)
+
+    IO.puts "Done!"
+  end
+  
+  def convert_files(output_dir) do
     IO.puts "Creating pdf documents"
     :os.cmd(String.to_char_list("(cd #{output_dir})"))
     IO.puts :os.cmd(String.to_char_list("(cd #{output_dir}; for i in #{output_dir}/*.tex; do lualatex $i; done)"))
     IO.puts "Cleaning up"
+    
     :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.tex)"))
     :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.aux)"))
     :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.log)"))
+   
     IO.puts "Creating Word Documents"
+  
     :os.cmd(String.to_char_list("(cd #{output_dir}; for j in *.txt; do soffice --headless --convert-to docx:\"MS Word 2007 XML\" $j; done)"))
     :os.cmd(String.to_char_list("(cd #{output_dir}; rm *.txt)"))
     :os.cmd(String.to_char_list("(cd #{output_dir}; for f in *.text; do mv -- \"$f\" \"${f%.text}.txt\"; done)"))
-    IO.puts "Done!"
-
-  end
-  
+  end  
 
   def get_args(args, argname) do
     args
@@ -107,21 +102,28 @@ defmodule FilePile do
       write_out_to_file(preamble, ending, newline, true, file, size - 1 - byte_size(word_to_write), words_list)
     end
   end
-  
-  #returns a list of terms from a term-weight file
-  def parse_weights_file(args, arg_name, number_of_files, first_parsing_term) do
+
+  def file_to_lines_list(args, arg_name, headers?) do
     file = 
       (get_args(args, arg_name))
       |> File.stream!
-      |> CSV.decode(headers: true)
+      |> CSV.decode(headers: headers?)
 
     row_count = 
       file
       |> Enum.count
 
-    file_as_list =
+    file_as_list = 
       file
       |> Enum.take(row_count)
+    
+    file_as_list
+  end
+
+  #returns a list of terms from a term-weight file
+  def parse_weights_file(args, arg_name, number_of_files, first_parsing_term) do
+    file_as_list = 
+      file_to_lines_list(args, arg_name, true) 
       |> Enum.map(fn maps -> to_tuple(maps, first_parsing_term, "weight") end)
 
     {first_term_list, weights_list} = Enum.unzip(file_as_list)
