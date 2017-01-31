@@ -24,7 +24,8 @@ This will generate 10 files in the outputdirectory using input_files/weights.csv
 Please note that you should use full paths to files and directories when calling this script.
 
 ## Using Your Own Size Profile
-The idea of FilePile is to create a number of files that mirror the intended file profile of your system. The size and type profile files in the input_files directory are CSV files with two columns. One represents file size (in bytes) and the other is the likelihood of a file of that size appearing in your system.
+The idea of FilePile is to create a number of files that mirror the intended file profile of your system. The size and type profile files in the input_files directory are CSV files with two columns. 
+One column represents file size (in bytes) or file type, and the other column is the likelihood of a file of that size or type appearing in your system.
 So if you have two rows
 
 | Size     | Weight |
@@ -34,4 +35,4 @@ So if you have two rows
 
 There will be roughly twice as many 20kb files as 10kb files.
 
-The type weights file is roughly similar but instead maps the likelihood of a given file type appearing in the resulting files. Currently filepile supports the creation of txt, .docx, and .pdf files. 
+The type weights file is roughly similar but instead maps the likelihood of a given file type appearing in the resulting files. Currently file_pile supports the creation of txt, .docx, and .pdf files. 
