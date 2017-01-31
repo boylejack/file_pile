@@ -20,7 +20,7 @@ To generate you files run the following command in the same directory where you 
 ```bash
 ./filepile --n 10 --outdir "outputdirectory"
 ```
-This will generate 10 files in the outputdirectory using weights.csv, types.csv and words.csv as the input word list.
+This will generate 10 files in the outputdirectory using input_files/weights.csv, input_files/types.csv and input_files/words.csv as the input word list.
 Please note that you should use full paths to files and directories when calling this script.
 
 ## Using Your Own Size Profile
