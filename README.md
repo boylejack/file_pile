@@ -24,7 +24,7 @@ This will generate 10 files in the outputdirectory using input_files/weights.csv
 Please note that you should use full paths to files and directories when calling this script.
 
 ## Using Your Own Size Profile
-The idea of FilePile is to create a number of files that mirror the intended file profile of your system. The size profile size is a CSV with two columns. One represents file size (in bytes) and the other is the likelihood of a file of that size appearing in your system.
+The idea of FilePile is to create a number of files that mirror the intended file profile of your system. The size and type profile files in the input_files directory are CSV files with two columns. One represents file size (in bytes) and the other is the likelihood of a file of that size appearing in your system.
 So if you have two rows
 
 | Size     | Weight |
