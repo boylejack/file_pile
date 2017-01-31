@@ -5,21 +5,21 @@ FilePile creates N random files, based on a given size and type profile and cont
 FilePile uses escript to generate an executable. You must have elixir and erlang installed on your machine. 
 To generate this executable:
 
-    ```
-    git clone https://github.com/mycroftHo/file_pile.git
-    cd file_pile
-    mix deps.get
-    mix escript.build
-    ```
+```bash
+git clone https://github.com/mycroftHo/file_pile.git
+cd file_pile
+mix deps.get
+mix escript.build
+```
     
 *NB* This program requires you to have libreoffice installed in order to generate word documents and pdfs.
 
 ## Usage
 To generate you files run the following command in the same directory where you generated the executable:
 
-    ```
-    ./filepile --n 10 --outdir "outputdirectory"
-    ```
+```bash
+./filepile --n 10 --outdir "outputdirectory"
+```
 This will generate 10 files in the outputdirectory using weights.csv, types.csv and words.csv as the input word list.
 Please note that you should use full paths to files and directories when calling this script.
 
