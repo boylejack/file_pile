@@ -1,3 +1,5 @@
-%{"csv": {:hex, :csv, "1.4.3", "de92e2bc85bc09ec676f19f6ec2daa59ba1f0103d1da96cf0cca36342c90d93f", [:mix], [{:parallel_stream, "~> 1.0.4", [hex: :parallel_stream, optional: false]}]},
+%{"bunt": {:hex, :bunt, "0.1.6", "5d95a6882f73f3b9969fdfd1953798046664e6f77ec4e486e6fafc7caad97c6f", [:mix], []},
+  "csv": {:hex, :csv, "1.4.3", "de92e2bc85bc09ec676f19f6ec2daa59ba1f0103d1da96cf0cca36342c90d93f", [:mix], [{:parallel_stream, "~> 1.0.4", [hex: :parallel_stream, optional: false]}]},
   "parallel_stream": {:hex, :parallel_stream, "1.0.5", "4c78d3e675f9eff885cbe252c89a8fc1d2fb803c0d03a914281e587834e09431", [:mix], []},
+  "sizeable": {:hex, :sizeable, "0.1.5", "47fb6563efb1e11374b552b778808cf143496a003d1889c56a953ef57fd7856e", [:mix], []},
   "uuid": {:hex, :uuid, "1.1.5", "96cb36d86ee82f912efea4d50464a5df606bf3f1163d6bdbb302d98474969369", [:mix], []}}

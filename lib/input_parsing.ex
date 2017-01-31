@@ -14,9 +14,9 @@ defmodule FilePile.InputParsing do
   
   def extract_from_keytake({{_,value}, _}), do: value
   
-  def file_to_lines_list(args, arg_name, headers?) do
+  def file_to_lines_list(path_to_file, headers?) do
     file = 
-      (get_args(args, arg_name))
+      path_to_file
       |> File.stream!
       |> CSV.decode(headers: headers?)
 
@@ -32,9 +32,10 @@ defmodule FilePile.InputParsing do
   end
 
   #returns a list of terms from a term-weight file
-  def parse_weights_file(args, arg_name, number_of_files, first_parsing_term) do
+  #NEED TO MAKE A CHANGE HERE
+  def parse_weights_file(path_to_file, number_of_files, first_parsing_term) do
     file_as_list = 
-      file_to_lines_list(args, arg_name, true) 
+      file_to_lines_list(path_to_file, true) 
       |> Enum.map(fn maps -> to_tuple(maps, first_parsing_term, "weight") end)
 
     {first_term_list, weights_list} = Enum.unzip(file_as_list)

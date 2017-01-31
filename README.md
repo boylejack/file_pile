@@ -1,6 +1,6 @@
 # FilePile
 
-FilePile creates N random files, based on a given size and type profile and containing some random combination of input words. It's intended use is for generating test files for load testing purposes. An example word list (positive-words.csv), a size profile (some_weights.csv) and a type profile (types.csv) have been included in this repo. 
+FilePile creates N random files, based on a given size and type profile and containing some random combination of input words. It's intended use is for generating test files for load testing purposes. An example word list (input_files/words.csv), a size profile (input_files/weights.csv) and a type profile (input_files/types.csv) have been included in this repo. 
 ## Installation
 FilePile uses escript to generate an executable. You must have elixir and erlang installed on your machine. 
 To generate this executable:
@@ -12,15 +12,15 @@ To generate this executable:
     mix escript.build
     ```
     
-*NB* This program requires you to have both pdflatex and libreoffice installed in order to generate word documents and pdfs.
+*NB* This program requires you to have libreoffice installed in order to generate word documents and pdfs.
 
 ## Usage
 To generate you files run the following command in the same directory where you generated the executable:
 
     ```
-    ./filepile --weights "weights.csv" --n 10 --outdir "outputdirectory" --words "inputwords.csv" --types "types.csv"
+    ./filepile --n 10 --outdir "outputdirectory"
     ```
-This will generate 10 files in the outputdirectory using weights.csv, types.csv and the inputwords list.
+This will generate 10 files in the outputdirectory using weights.csv, types.csv and words.csv as the input word list.
 Please note that you should use full paths to files and directories when calling this script.
 
 ## Using Your Own Size Profile

@@ -15,7 +15,7 @@ defmodule FilePile.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger]]
+    [applications: [:logger, :bunt, :sizeable]]
   end
 
   # Dependencies can be Hex packages:
@@ -30,7 +30,9 @@ defmodule FilePile.Mixfile do
   defp deps do
     [
       {:csv, "~> 1.4.2"},
-      {:uuid, "~> 1.1"}
+      {:uuid, "~> 1.1"},
+      {:bunt, "~> 0.1.0"},
+      {:sizeable, "~> 0.1.5"}
     ]
   end
 

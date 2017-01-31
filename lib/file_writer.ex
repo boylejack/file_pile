@@ -13,11 +13,8 @@ defmodule FilePile.FileWriter do
 
   def generate_pdf(size, words_list, dir) do
     #tex will be converted by pdf later
-    name = dir <> "/" <> UUID.uuid1() <> ".tex"
-    preamble = "\\documentclass{article}\n\\begin{document}\n"
-    ending = "\n\\end{document}"
-    newline = "\n\\\\par"
-    write_out_to_file(preamble, ending, newline, false, name, size, words_list)
+    name = dir <> "/" <> UUID.uuid1() <> ".text"
+    write_out_to_file("", "", "\n", false, name, size, words_list)
   end
  
   def generate_doc(size, words_list, dir) do
@@ -34,9 +31,17 @@ defmodule FilePile.FileWriter do
   
   def write_out_to_file(preamble, ending, newline ,file_created, file, size, words_list) do
     if file_created == false do
-      {:ok, new_file} = File.open file, [:write]
-      IO.binwrite new_file, preamble
-      write_out_to_file(preamble, ending, newline, true, new_file, size, words_list)
+      case File.open file, [:write] do
+        {:ok, new_file} -> 
+          File.open file, [:write]
+          IO.binwrite new_file, preamble
+          write_out_to_file(preamble, ending, newline, true, new_file, size, words_list)
+        {:error, :enoent} ->
+          [:red, "[ERROR] ", :red, "Output folder does not exist"]
+          |> Bunt.puts
+          System.halt(1)
+        _ -> System.halt(1)
+      end
     end
 
     if size <= 0 and file_created == true do
@@ -60,17 +65,14 @@ defmodule FilePile.FileWriter do
   def convert_files(output_dir) do
     IO.puts "Creating pdf documents"
     :os.cmd(String.to_char_list("(cd #{output_dir})"))
-    IO.puts :os.cmd(String.to_char_list("(cd #{output_dir}; for i in #{output_dir}/*.tex; do lualatex $i; done)"))
+    IO.puts :os.cmd(String.to_char_list("(cd #{output_dir}; parallel -j 10 soffice --headless --convert-to pdf:\"writer_pdf_Export\" ::: *.text)"))
     IO.puts "Cleaning up"
     
-    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.tex)"))
-    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.aux)"))
-    :os.cmd(String.to_char_list("(cd #{output_dir}; rm #{output_dir}/*.log)"))
    
     IO.puts "Creating Word Documents"
   
     :os.cmd(String.to_char_list("(cd #{output_dir}; for j in *.txt; do soffice --headless --convert-to docx:\"MS Word 2007 XML\" $j; done)"))
     :os.cmd(String.to_char_list("(cd #{output_dir}; rm *.txt)"))
-    :os.cmd(String.to_char_list("(cd #{output_dir}; for f in *.text; do mv -- \"$f\" \"${f%.text}.txt\"; done)"))
+    :os.cmd(String.to_char_list("(cd #{output_dir}; for f in *.ptf; do mv -- \"$f\" \"${f%.text}.txt\"; done)"))
   end  
 end
