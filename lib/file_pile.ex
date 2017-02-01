@@ -9,16 +9,16 @@ defmodule FilePile do
     config_file_path = System.cwd <> "/input_files"
 
     words_list = 
-      file_to_lines_list(config_file_path <> "/input_words.csv", false)
+      file_to_lines_list(config_file_path <> "/words.csv", false)
       |> to_string_list
 
     number_of_files = 
       get_args(args, :n)
       |> String.to_integer
 
-    sizes = parse_weights_file(config_file_path <> "/size_weights.csv", number_of_files, "size")
+    sizes = parse_weights_file(config_file_path <> "/sizes.csv", number_of_files, "size")
 
-    types = parse_weights_file(config_file_path <> "/type_weights.csv", number_of_files, "type")
+    types = parse_weights_file(config_file_path <> "/types.csv", number_of_files, "type")
 
     file_specs = List.zip([types,sizes])
     IO.inspect file_specs

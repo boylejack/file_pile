@@ -30,9 +30,8 @@ defmodule FilePile.InputParsing do
     
     file_as_list
   end
-
+  
   #returns a list of terms from a term-weight file
-  #NEED TO MAKE A CHANGE HERE
   def parse_weights_file(path_to_file, number_of_files, first_parsing_term) do
     file_as_list = 
       file_to_lines_list(path_to_file, true) 
